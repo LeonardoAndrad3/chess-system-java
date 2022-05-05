@@ -1,7 +1,9 @@
 package model.chess;
 
 import model.boardgame.Board;
+import model.boardgame.Piece;
 import model.boardgame.Position;
+import model.chess.exception.ChessException;
 import model.chess.pieces.King;
 import model.chess.pieces.Rook;
 
@@ -24,6 +26,27 @@ public class ChessMatch {
 			}
 		}
 		return mat;
+	}
+	
+	private Piece makeMove(Position source, Position target) {
+		Piece p = board.removePiece(source);
+		Piece capturedPiece = board.removePiece(target);
+		board.placePiece(p, target);
+		return capturedPiece;
+	}
+	
+	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+		Position source = sourcePosition.toPositon();
+		Position target = targetPosition.toPositon();
+		validateSourcePosition(source);
+		Piece capturedPiece = makeMove(source, target);
+		return (ChessPiece)capturedPiece;
+	}
+	
+	private void validateSourcePosition(Position position) {
+		if(!board.thereIsAPiece(position)) {
+			throw new ChessException("There is no piece on souce position");
+		}
 	}
 	
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
