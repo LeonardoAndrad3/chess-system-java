@@ -56,9 +56,8 @@ public class Board {
 		}
 		
 		Piece aux = piece(position);
-		aux = null;
+		aux.position = null;
 		pieces[position.getRow()][position.getColumn()] = null;
-		System.out.println(aux);
 		return aux;
 	}
 	
