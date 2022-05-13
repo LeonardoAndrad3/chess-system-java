@@ -2,13 +2,17 @@ package model.chess.pieces;
 
 import model.boardgame.Board;
 import model.boardgame.Position;
+import model.chess.ChessMatch;
 import model.chess.ChessPiece;
 import model.chess.Color;
 
 public class King extends ChessPiece {
+	
+	private ChessMatch chessMatch;
 
-	public King(Board board, Color color) {
+	public King(Board board, Color color,ChessMatch chessMatch) {
 		super(board, color);
+		this.chessMatch = chessMatch;
 	}
 
 	@Override
@@ -21,6 +25,12 @@ public class King extends ChessPiece {
 		return p == null || p.getColor() != getColor();
 	}
 
+	private boolean testRookCastling(Position position) {
+		ChessPiece p = (ChessPiece)getBoard().piece(position);
+		return p != null && p instanceof Rook && p.getColor() == getColor() && p.getMoveCount() == 0;
+	}
+	
+	
 	@Override
 	public boolean[][] possibleMoves() {
 		boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
@@ -74,6 +84,30 @@ public class King extends ChessPiece {
 		if (getBoard().positionExists(p) && canMove(p)) {
 			mat[p.getRow()][p.getColumn()] = true;
 		}
+		
+		// #SpecialMove Castling
+		if(getMoveCount() == 0 && !chessMatch.getCheck()) {
+			Position posT1 = new Position(position.getRow(), position.getColumn() + 3);
+			if(testRookCastling(posT1)) {
+				Position p1 = new Position(position.getRow(), position.getColumn() + 1);
+				if(getBoard().piece(p1) == null && getBoard().piece(p1.getRow(), p1.getColumn() + 1) == null) {
+					mat[position.getRow()][position.getColumn() + 2] = true;
+				}
+			}
+			
+			if(getMoveCount() == 0 && !chessMatch.getCheck()) {
+				posT1 = new Position(position.getRow(), position.getColumn() - 4);
+				if(testRookCastling(posT1)) {
+					Position p1 = new Position(position.getRow(), position.getColumn() - 1);
+					if(getBoard().piece(p1) == null && getBoard().piece(p1.getRow(), p1.getColumn() - 1) == null && getBoard().piece(p1.getRow(), p1.getColumn() - 2) == null) {
+						mat[position.getRow()][position.getColumn() - 2] = true;
+					}
+				}
+			}
+		}
+		
+		
+		
 
 		return mat;
 	}
